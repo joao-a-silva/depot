@@ -9,8 +9,9 @@ class CartsController < ApplicationController
 
   # GET /carts/1
   # GET /carts/1.json
-  def show
-  end
+ def show
+  
+ end
 
   # GET /carts/new
   def new
@@ -54,10 +55,13 @@ class CartsController < ApplicationController
   # DELETE /carts/1
   # DELETE /carts/1.json
   def destroy
+    @cart = Cart.find(params[:id])
     @cart.destroy
+    session[:cart_id] = nil
     respond_to do |format|
-      format.html { redirect_to carts_url, notice: 'Cart was successfully destroyed.' }
-      format.json { head :no_content }
+      format.html { redirect_to(store_url,
+        :notice => 'Your cart is currently empty' ) }
+      format.xml { head :ok }
     end
   end
 
@@ -70,5 +74,13 @@ class CartsController < ApplicationController
     # Never trust parameters from the scary internet, only allow the white list through.
     def cart_params
       params[:cart]
+    end
+
+
+   rescue_from ActiveRecord::RecordNotFound, with: :invalid_cart
+  # GET /carts
+    def invalid_cart
+      logger.error "Attempt to access invalid cart #{params[:id]}"
+      redirect_to store_url, notice: 'Invalid cart'
     end
 end
